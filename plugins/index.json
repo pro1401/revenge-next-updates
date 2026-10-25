@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "name": "Personal Next Plugins",
+  "description": "Locally adapted plugins for this installation.",
+  "plugins": {
+    "pro1401.split-messages": {
+      "name": "Split Messages",
+      "description": "Splits long messages into up to 20 sequential messages. Respects channel slowmode; keeps attachments and replies on the first part.",
+      "author": "pro1401 (local setup)",
+      "icon": "ChatArrowRightIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://raw.githubusercontent.com/pro1401/revenge-next-updates/main/plugins/split-messages-1.0.0.zip",
+          "sha256": "e9e7b8f05cfc9c4c16707b04f20a5e9134005036213a8d70c886c744bf2712f3",
+          "size": 1754,
+          "dependencies": {
+            "revenge.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": ">=352.2"
+            }
+          }
+        }
+      }
+    }
+  }
+}
