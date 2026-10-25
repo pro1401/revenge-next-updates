@@ -1,0 +1,35 @@
+name: Update official Revenge Next bundle
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - sync.py
+      - .github/workflows/sync.yml
+  schedule:
+    - cron: '23 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: revenge-next-mirror
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download and verify official production artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python sync.py
+      - name: Publish only when upstream changes
+        run: |
+          git add revenge.bundle manifest.json source.zip LICENSE.upstream build-info.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update verified official Revenge Next build'
+          git push
