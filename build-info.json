@@ -1,0 +1,8 @@
+{
+  "upstream": "revenge-mod/revenge-bundle-next",
+  "commit": "fa6cb81897b3b2649e7d8600d70d2b945daf041f",
+  "artifact_id": 12552393063,
+  "artifact_sha256": "sha256:bd6d21def70b58a2d2abc8d6ed06b337c0729fba208c1ccf9e5b351b70509c44",
+  "bundle_sha256": "6cf2e836260fd06a4c21009c3a5970f24cfee4ac686f61822380ee036a496521",
+  "created_at": "2026-10-24T07:41:47Z"
+}
