@@ -20,3 +20,16 @@ of repository inactivity; check Actions if updates stop.
 
 See `build-info.json` for provenance, `source.zip` for corresponding source,
 and `LICENSE.upstream` for the upstream GPL-3.0 license.
+
+## Personal plugin repository
+
+Add `https://raw.githubusercontent.com/pro1401/revenge-next-updates/main/plugins`
+as a plugin repository to install Split Messages for Next. It splits newly sent
+long messages into at most 20 parts, respects channel slowmode, and keeps
+attachments and reply context on the first part. It stops on errors instead of
+retrying messages automatically. Its source is in `plugins/split-messages/`.
+
+The splitter was checked locally with mocked Discord methods for character
+limits, Unicode, text preservation, attachment handling and cleanup. A real
+message send is not part of installation verification. Old Classic plugin
+URLs use a different plugin format and should not be added as Next repositories.
