@@ -9,6 +9,27 @@ import zipfile
 
 UPSTREAM = 'revenge-mod/revenge-bundle-next'
 REPOSITORY = 'https://revenge-mod.github.io/revenge-community-plugins'
+GENERATOR_VERSION = 2
+
+def order_plugins(plugins):
+    by_id = {p['id']: p for p in plugins}
+    ordered, visiting, visited = [], set(), set()
+    def visit(plugin_id):
+        if plugin_id in visited:
+            return
+        if plugin_id in visiting:
+            raise ValueError('Cyclic bundled plugin dependency: ' + plugin_id)
+        visiting.add(plugin_id)
+        plugin = by_id[plugin_id]
+        for dep_id in plugin.get('dependencies', {}):
+            if dep_id in by_id:
+                visit(dep_id)
+        visiting.remove(plugin_id)
+        visited.add(plugin_id)
+        ordered.append(plugin)
+    for plugin_id in by_id:
+        visit(plugin_id)
+    return ordered
 
 def get(url, api=False):
     headers = {'User-Agent': 'revenge-next-personal-updater'}
@@ -25,7 +46,8 @@ def main():
     artifact = next(a for a in artifacts if a['name'] == 'revenge-bundle' and not a['expired'] and a['workflow_run']['head_branch'] == 'main' and a['workflow_run']['head_repository_id'] == 952540647)
     sha = artifact['workflow_run']['head_sha']
     status_path = Path('build-info.json')
-    if status_path.exists() and json.loads(status_path.read_text())['artifact_id'] == artifact['id']:
+    previous = json.loads(status_path.read_text()) if status_path.exists() else {}
+    if previous.get('artifact_id') == artifact['id'] and previous.get('generator_version') == GENERATOR_VERSION:
         print('Already current')
         return
     archive = get(f'https://nightly.link/{UPSTREAM}/actions/artifacts/{artifact["id"]}.zip')
@@ -66,11 +88,12 @@ def main():
         license_text = z.read(root + 'LICENSE')
     # All downloads are validated before replacing published files.
     Path('revenge.bundle').write_bytes(bundle)
-    Path('manifest.json').write_text(json.dumps({'format': 1, 'version': version, 'plugins': plugins}, separators=(',', ':')), encoding='utf-8')
+    Path('manifest.json').write_text(json.dumps({'format': 1, 'version': version, 'plugins': order_plugins(plugins)}, separators=(',', ':')), encoding='utf-8')
     Path('source.zip').write_bytes(source)
     Path('LICENSE.upstream').write_bytes(license_text)
-    status_path.write_text(json.dumps({'upstream': UPSTREAM, 'commit': sha, 'artifact_id': artifact['id'], 'artifact_sha256': digest, 'bundle_sha256': hashlib.sha256(bundle).hexdigest(), 'created_at': artifact['created_at']}, indent=2) + '\n', encoding='utf-8')
+    status_path.write_text(json.dumps({'generator_version': GENERATOR_VERSION, 'upstream': UPSTREAM, 'commit': sha, 'artifact_id': artifact['id'], 'artifact_sha256': digest, 'bundle_sha256': hashlib.sha256(bundle).hexdigest(), 'created_at': artifact['created_at']}, indent=2) + '\n', encoding='utf-8')
     print('Mirrored official build', sha)
 
 if __name__ == '__main__':
     main()
+
